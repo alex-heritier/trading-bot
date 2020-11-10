@@ -16,3 +16,6 @@ def safe_num(a):
 
 def safe_mult(a, b):
     return safe_num(Decimal(a) * Decimal(b))
+
+def safe_div(a, b):
+    return safe_num(Decimal(a) / Decimal(b))

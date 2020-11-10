@@ -50,7 +50,8 @@ def reset_db():
         db['total'] = '100000'
         db['cash'] = db['total']
         db['equity'] = '0'
-        db['total'] = db['cash']
+        db['original_capital'] = db['total']
+        db['growth'] = '0'
         db['positions'] = {'id_counter': 0, 'crypto': []}
         db['transactions'] = {'id_counter': 0, 'crypto': []}
         ctx.write(db)
@@ -79,6 +80,7 @@ def update_equity_balance():
         balance = functools.reduce(lambda sum, p : util.safe_num(Decimal(sum) + Decimal(p['total_price'])), db['positions']['crypto'], 0)
         db['equity'] = str(Decimal(balance))
         db['total'] = str(util.safe_num(Decimal(db['cash']) + Decimal(db['equity'])))
+        db['growth'] = str(util.safe_mult(util.safe_div(db['total'], db['original_capital']) - 1, 100))
         return ctx.write(db)
 
 ### Positions
