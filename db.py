@@ -8,9 +8,9 @@ import util
 
 DB_FILENAME = "db.json"
 
-_mutex = Lock()
+_file_mutex = Lock()
 
-# Database manipulation
+### Database manipulation
 def _open_db():
     with open(DB_FILENAME, 'r') as stream:
         data = json.load(stream)
@@ -30,7 +30,7 @@ class _Db:
 class _DbContext(object):
     db = None
     def __init__(self):
-        _mutex.acquire()
+        _file_mutex.acquire()
         self.db = _Db()
 
     def __enter__(self):
@@ -40,14 +40,14 @@ class _DbContext(object):
         if exc_value != None:
             print('An error occurred %s: %s' % (self.db, exc_value))
             traceback.print_tb(exc_traceback)
-        _mutex.release()
+        _file_mutex.release()
         return True
 
 def reset_db():
     with _DbContext() as ctx:
         db = ctx.read()
         db = {}
-        db['total'] = '1000'
+        db['total'] = '100000'
         db['cash'] = db['total']
         db['equity'] = '0'
         db['total'] = db['cash']
@@ -55,7 +55,7 @@ def reset_db():
         db['transactions'] = {'id_counter': 0, 'crypto': []}
         ctx.write(db)
 
-# Balance
+### Balance
 def get_cash_balance():
     with _DbContext() as ctx:
         db = ctx.read()
@@ -81,7 +81,7 @@ def update_equity_balance():
         db['total'] = str(util.safe_num(Decimal(db['cash']) + Decimal(db['equity'])))
         return ctx.write(db)
 
-# Positions
+### Positions
 ## Crypto
 def get_crypto_positions_by_symbol(symbol):
     with _DbContext() as ctx:
@@ -113,19 +113,20 @@ def remove_crypto_positions(symbol, quantity):
         rm_pos = []
         for pos in db['positions']['crypto']:
             if pos['symbol'] == symbol:
-                if quantity >= Decimal(pos['quantity']): # Empty position
+                if Decimal(pos['quantity']) <= Decimal(quantity): # Empty position
                     rm_pos.append(pos['id'])
                     quantity = util.safe_num(Decimal(quantity) - Decimal(pos['quantity']))
-                else:                           # Reduce position size
+                else:                                            # Reduce position size
+                    old_position_quantity = pos['quantity']
                     pos['quantity'] = str(util.safe_num(Decimal(pos['quantity']) - Decimal(quantity)))
                     pos['total_price'] = str(util.safe_mult(pos['quantity'], pos['unit_price']))
-                    quantity = util.safe_num(Decimal(quantity) - Decimal(pos['quantity']))
+                    quantity = util.safe_num(Decimal(quantity) - Decimal(old_position_quantity))
                 if quantity <= 0:
                     break
         db['positions']['crypto'] = list(filter(lambda p : p['id'] not in rm_pos, db['positions']['crypto']))
         ctx.write(db)
 
-# Transactions
+### Transactions
 ## Crypto
 def add_crypto_transaction(symbol, price, quantity, side):
     with _DbContext() as ctx:

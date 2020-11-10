@@ -4,13 +4,13 @@ import yaml
 import time
 
 import util
-import broker
+import rh_broker as broker
 import db
 
-CREDENTIALS_FILENAME = "robinhood_credentials.yml"
+CREDENTIALS_FILENAME = 'robinhood_credentials.yml'
 
 CRYPTO_SYMBOLS = ['DOGE', 'ETC', 'LTC']
-WAIT_TIME = 2
+WAIT_TIME = 2 # seconds
 
 price_history = {}
 
@@ -38,8 +38,9 @@ def run_crypto_algo(symbol):
         amount = 0.5
     elif symbol == 'BTC':
         amount = 0.002
+    amount *= 1000 # multiplier
 
-    sell_to_buy_ratio = 1.1
+    sell_to_buy_ratio = 1.15
 
     if Decimal(curr_price) < Decimal(last_price):
         broker.buy_crypto(symbol, amount)
@@ -54,7 +55,7 @@ def run_crypto_algo(symbol):
 # Login to Robinhood using credentials file
 l = login()
 
-# Begin main loop of polling current price data then acting on it
+### Begin main loop of polling current price data then acting on it
 db.reset_db()
 while True:
     tick_action()
