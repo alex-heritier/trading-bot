@@ -38,7 +38,7 @@ def run_crypto_algo(symbol):
         amount = 0.5
     elif symbol == 'BTC':
         amount = 0.002
-    amount *= 1000 # multiplier
+    amount *= 3 # multiplier
 
     sell_to_buy_ratio = 1.15
 

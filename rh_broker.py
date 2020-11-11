@@ -49,12 +49,12 @@ def sell_crypto(symbol, amount):
     positions = db.get_crypto_positions_by_symbol(symbol)
     qty_of_symbol = functools.reduce(lambda sum, p : sum + Decimal(p['quantity']), positions, 0)
     if qty_of_symbol == 0:
-        util.log("! trying to sell %s %s but only own %s"%(symbol, amount, qty_of_symbol))
+        util.log("! trying to sell %s x %s but don't own any"%(amount, symbol))
         _broker_mutex.release()
         return False
     else:
         amount = util.safe_num(min(amount, qty_of_symbol))
-        
+
     total = util.safe_mult(price, amount)
     db.modify_cash_balance(total)
     db.remove_crypto_positions(symbol=symbol, quantity=amount)

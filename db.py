@@ -47,7 +47,7 @@ def reset_db():
     with _DbContext() as ctx:
         db = ctx.read()
         db = {}
-        db['total'] = '100000'
+        db['total'] = '1000'
         db['cash'] = db['total']
         db['equity'] = '0'
         db['original_capital'] = db['total']
