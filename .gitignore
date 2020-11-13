@@ -1,3 +1,4 @@
 robinhood_credentials.yml
 __pycache__
-db.json
+.DS_Store
+db/*.json

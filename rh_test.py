@@ -9,7 +9,7 @@ import db
 
 CREDENTIALS_FILENAME = 'robinhood_credentials.yml'
 
-CRYPTO_SYMBOLS = ['DOGE', 'ETC', 'LTC']
+CRYPTO_SYMBOLS = ['DOGE', 'BTC']
 WAIT_TIME = 2 # seconds
 
 price_history = {}
