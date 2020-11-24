@@ -2,14 +2,23 @@ import robin_stocks as r
 from threading import Thread, Lock
 from decimal import *
 import functools
+import yaml
 
 import util
 import db
+
+CREDENTIALS_FILENAME = 'robinhood_credentials.yml'
 
 BUY_SIDE = 'buy'
 SELL_SIDE = 'sell'
 
 _broker_mutex = Lock()
+
+### General
+def init():
+    with open(CREDENTIALS_FILENAME, 'r') as stream:
+        data = yaml.safe_load(stream)
+    r.login(data['email'], data['password'])
 
 ### Crypto
 def get_crypto_price(symbol):

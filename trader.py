@@ -1,24 +1,43 @@
 import robin_stocks as r
 from decimal import *
-import yaml
 import time
+import threading
 
 import util
 import rh_broker as broker
 import db
 
-CREDENTIALS_FILENAME = 'robinhood_credentials.yml'
-
-CRYPTO_SYMBOLS = ['DOGE', 'BTC']
+CRYPTO_SYMBOLS = ['DOGE', 'BTC', 'ETH']
 WAIT_TIME = 2 # seconds
 
 price_history = {}
+t_trader = None
+t_trader_running = False
 
-### Helper Methods
-def login():
-    with open(CREDENTIALS_FILENAME, 'r') as stream:
-        data = yaml.safe_load(stream)
-    r.login(data['email'], data['password'])
+### Lifecycle methods
+def start():
+    global t_trader, t_trader_running
+    util.log("START", key='trader')
+    t_trader_running = True
+    t_trader = threading.Thread(target=trade, daemon=True)
+    t_trader.start()
+    return t_trader
+
+def stop():
+    global t_trader_running
+    util.log("STOP", key='trader')
+    t_trader_running = False
+
+### Trade actions
+def trade():
+    # Initialize
+    broker.init()
+    db.reset_db()
+
+    # Begin main loop of polling current price data then acting on it
+    while t_trader_running:
+        tick_action()
+        time.sleep(WAIT_TIME)
 
 def tick_action():
     for symbol in CRYPTO_SYMBOLS:
@@ -30,8 +49,8 @@ def run_crypto_algo(symbol):
         price_history[symbol] = curr_price
     last_price = price_history[symbol]
 
-    if symbol == 'ETC':
-        amount = 2
+    if symbol == 'ETH':
+        amount = 0.05
     elif symbol == 'DOGE':
         amount = 10000
     elif symbol == 'LTC':
@@ -47,16 +66,6 @@ def run_crypto_algo(symbol):
     elif Decimal(curr_price) > Decimal(last_price):
         broker.sell_crypto(symbol, util.safe_mult(amount, sell_to_buy_ratio))
     else:
-        util.log("no trade for %s..."%symbol)
+        util.log("no trade for %s..."%symbol, key='trader')
 
     price_history[symbol] = curr_price
-
-### Program Start
-# Login to Robinhood using credentials file
-l = login()
-
-### Begin main loop of polling current price data then acting on it
-db.reset_db()
-while True:
-    tick_action()
-    time.sleep(WAIT_TIME)
