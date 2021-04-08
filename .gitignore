@@ -1,6 +1,6 @@
-robinhood_credentials.yml
-__pycache__
 .DS_Store
+__pycache__
 
+robinhood_credentials.yml
 db/*.json
 log/*.log

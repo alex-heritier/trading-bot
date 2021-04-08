@@ -5,7 +5,7 @@ import trader
 def cmd_start(_):
     print("Starting trader daemon...")
     trader.start()
-    print("Done")
+    print("Done - View trader logs in log/trader.log")
 
 def cmd_stop(_):
     print("Stopping trader daemon...")
@@ -30,6 +30,12 @@ def handle_input(raw_input):
     else:
         handler(raw_input)
 
-while True:
-    raw_input = input('Ƀ  ')
-    handle_input(raw_input)
+# For debugging purposes
+if True:
+    cmd_start(None)
+    while True:
+        pass
+else:
+    while True:
+        raw_input = input('Ƀ  ')
+        handle_input(raw_input)

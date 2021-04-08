@@ -1,2 +1,2 @@
 run:
-	python3 ./command.py
+	python3 ./shell.py
