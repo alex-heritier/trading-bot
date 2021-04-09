@@ -16,9 +16,17 @@ _broker_mutex = Lock()
 
 ### General
 def init():
-    with open(CREDENTIALS_FILENAME, 'r') as stream:
-        data = yaml.safe_load(stream)
-    r.login(data['email'], data['password'])
+    try:
+        with open(CREDENTIALS_FILENAME, 'r') as stream:
+            data = yaml.safe_load(stream)
+            email = data['email']
+            password = data['password']
+    except:
+        print("Credentials file missing! Defaulting to manual input.")
+        email = input("Your email: ")
+        password = input("Your password: ")
+    r.login(email, password)
+
 
 ### Crypto
 def get_crypto_price(symbol):

@@ -3,14 +3,12 @@ import sys
 import trader
 
 def cmd_start(_):
-    print("Starting trader daemon...")
+    print("Starting trader daemon... (view output in log/trader.log)")
     trader.start()
-    print("Done - View trader logs in log/trader.log")
 
 def cmd_stop(_):
     print("Stopping trader daemon...")
     trader.stop()
-    print("Done")
 
 def cmd_exit(_):
     sys.exit()
