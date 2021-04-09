@@ -1,17 +1,15 @@
 import threading
 import time
 import yaml
-import requests
 import websockets
 
 import socket
 import sys
 import os
 
-# Historic Rates - example URL for getting historical price data
-# - https://api.pro.coinbase.com/products/btc-usd/candles?start=01-01-2021&end=01-02-2021&granularity=300
+from helper import coinbase
 
-class TickerDaemon:
+class daemon:
     WAIT_TIME = 2 # seconds
 
 ### PRIVATE
@@ -24,6 +22,7 @@ class TickerDaemon:
         print("Config: %s"%data)
 
         # Init variables
+        self._is_running = True
         self._config = data
         self._in_socket = self._build_in_socket(self._config["socket"])
         self._in_thread = threading.Thread(target=self._listen_for_clients, daemon=True)
@@ -31,6 +30,9 @@ class TickerDaemon:
 
         # Start listener thread
         self._in_thread.start()
+
+    def __del__(self):
+        self._is_running = False
 
     # Build the input socket
     def _build_in_socket(self, socket_file):
@@ -42,9 +44,10 @@ class TickerDaemon:
             if os.path.exists(socket_file):
                 raise
         sock.bind(socket_file)
-        sock.listen(1)
+        sock.listen(4)
         return sock
 
+    # Listen for incoming clients
     def _listen_for_clients(self):
         while True:
             # Wait for a connection
@@ -57,13 +60,14 @@ class TickerDaemon:
         for ticker_pair in self._config["ticker_pairs"]:
             self._publish_price(ticker_pair)
 
-    # Get price data and then write it on the output socket
+    # Get price data and send it to connected clients
     def _publish_price(self, ticker_pair):
-        r = requests.get("https://api.coinbase.com/v2/prices/%s/spot"%ticker_pair)
-        bytes = str(r.json()).encode('UTF-8')
+        r = coinbase.get_ticker_price(ticker_pair)
+        # r = coinbase.get_historical_rates(ticker_pair)
+        msg = "{%s} %s"%(ticker_pair, str(r.json()))
         for conn in self._client_conns:
             try:
-                conn.sendall(bytes)
+                conn.sendall(msg.encode('UTF-8'))
             except BrokenPipeError:
                 print("Client disconnected [%s]"%conn.fileno())
                 self._client_conns.remove(conn)
@@ -75,6 +79,6 @@ class TickerDaemon:
 
     # Main loop
     def run(self):
-        while True:
+        while self._is_running:
             self._tick()
-            time.sleep(TickerDaemon.WAIT_TIME)
+            time.sleep(daemon.WAIT_TIME)
