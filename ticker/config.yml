@@ -1,0 +1,6 @@
+provider: coinbase
+socket: tik.s
+ticker_pairs:
+  - KNC-USD
+  - SNX-USD
+  - ADA-USD
