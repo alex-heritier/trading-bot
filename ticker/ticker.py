@@ -1,7 +1,5 @@
 import threading
 import time
-import yaml
-import websockets
 
 import socket
 import sys
@@ -9,22 +7,16 @@ import os
 
 from helper import coinbase
 
-class daemon:
-    WAIT_TIME = 2 # seconds
+class Daemon:
+    WAIT_TIME = 10 # seconds
 
 ### PRIVATE
 
-    def __init__(self, config_file):
-        # Load config file
-        print("TickerDaemon - Using config file %s"%config_file)
-        with open(config_file, 'r') as stream:
-            data = yaml.safe_load(stream)
-        print("Config: %s"%data)
-
+    def __init__(self, config_data):
         # Init variables
         self._is_running = True
-        self._config = data
-        self._in_socket = self._build_in_socket(self._config["socket"])
+        self._config = config_data
+        self._in_socket = self._build_in_socket(config_data["socket"])
         self._in_thread = threading.Thread(target=self._listen_for_clients, daemon=True)
         self._client_conns = []
 
@@ -52,7 +44,7 @@ class daemon:
         while True:
             # Wait for a connection
             connection, client_address = self._in_socket.accept()
-            print("New client [%s]"%connection.fileno())
+            print("[Ticker] new client [%s]"%connection.fileno())
             self._client_conns.append(connection)
 
     # Run a single tick of the main loop
@@ -63,13 +55,12 @@ class daemon:
     # Get price data and send it to connected clients
     def _publish_price(self, ticker_pair):
         r = coinbase.get_ticker_price(ticker_pair)
-        # r = coinbase.get_historical_rates(ticker_pair)
         msg = "{%s} %s"%(ticker_pair, str(r.json()))
         for conn in self._client_conns:
             try:
                 conn.sendall(msg.encode('UTF-8'))
             except BrokenPipeError:
-                print("Client disconnected [%s]"%conn.fileno())
+                print("[Ticker] client disconnected [%s]"%conn.fileno())
                 self._client_conns.remove(conn)
 
 ### PUBLIC
@@ -81,4 +72,4 @@ class daemon:
     def run(self):
         while self._is_running:
             self._tick()
-            time.sleep(daemon.WAIT_TIME)
+            time.sleep(Daemon.WAIT_TIME)

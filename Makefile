@@ -1,5 +1,5 @@
 run:
-	python3 ./ticker_tester.py
+	python3 ./engine_tester.py
 
 old_run:
 	python3 ./shell.py

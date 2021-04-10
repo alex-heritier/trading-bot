@@ -1,5 +1,5 @@
 provider: coinbase
-socket: /tmp/ticker.s
+ticker_socket: /tmp/ticker.s
 ticker_pairs:
   - BTC-USD
   - ETH-USD
