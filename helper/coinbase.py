@@ -4,7 +4,9 @@ import requests
 # - https://api.pro.coinbase.com/products/btc-usd/candles?start=01-01-2021&end=01-02-2021&granularity=300
 
 def get_ticker_price(ticker_pair, type="spot"):
-    r = requests.get("https://api.coinbase.com/v2/prices/%s/%s"%(ticker_pair, type))
+    url = "https://api.coinbase.com/v2/prices/%s/%s"%(ticker_pair, type)
+    print("helper.coinbase - %s"%url)
+    r = requests.get(url)
     return r
 
 def get_historical_rates(ticker_pair, granularity="300"):
@@ -19,5 +21,6 @@ def get_historical_rates(ticker_pair, granularity="300"):
     if granularity:
         url = ("%s&granularity=%s"%(url, granularity))
 
+    print("helper.coinbase - %s"%url)
     r = requests.get(url)
     return r
