@@ -24,3 +24,10 @@ def get_historical_rates(ticker_pair, granularity="300"):
     print("helper.coinbase - %s"%url)
     r = requests.get(url)
     return r
+
+def calc_historic_ma(historic_data):
+    sum = 0
+    for entry in historic_data:
+        # FORMAT [timestamp, open, close, spot, volume]
+        sum = sum + entry[3]
+    return sum / len(historic_data)
