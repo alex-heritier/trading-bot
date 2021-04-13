@@ -54,7 +54,7 @@ class Daemon:
     def _setup_historic_data(self):
         tickers = self._config["ticker_pairs"]
         for ticker in tickers:
-            historic_data = coinbase.get_historical_rates(ticker, granularity="21600").json()
+            historic_data = coinbase.get_historic_rates(ticker, granularity="21600").json()
             ma = coinbase.calc_historic_ma(historic_data)
             print("MOVING AVERAGE for %s == %s"%(ticker, ma))
 

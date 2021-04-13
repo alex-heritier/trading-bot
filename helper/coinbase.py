@@ -9,7 +9,7 @@ def get_ticker_price(ticker_pair, type="spot"):
     r = requests.get(url)
     return r
 
-def get_historical_rates(ticker_pair, granularity="300"):
+def get_historic_rates(ticker_pair, granularity="300"):
     start = None # "01-01-2021"
     end = None # "01-02-2021"
 
